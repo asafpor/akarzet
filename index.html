@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>אקרזט - המשחק של סבתא</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👵</text></svg>">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            direction: rtl;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--light);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 30px;
+        }
+
+        @media (min-width: 500px) {
+            .app-container {
+                max-width: 500px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .header-emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        /* Content */
+        .content {
+            padding: 15px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .card-title-icon {
+            font-size: 1.4rem;
+        }
+
+        /* Grandma Face Card */
+        .grandma-card {
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        #grandma-face {
+            font-size: 120px;
+            margin-bottom: 10px;
+            transition: transform 0.1s;
+        }
+
+        #grandma-mood {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        #grandma-says {
+            font-size: 1.1rem;
+            color: #666;
+            min-height: 50px;
+            padding: 10px;
+            font-style: italic;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Progress bar */
+        .anger-container {
+            background: #e0e0e0;
+            border-radius: 12px;
+            height: 24px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #anger-bar {
+            background: linear-gradient(90deg, #4caf50, #4caf50);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+            border-radius: 12px;
+        }
+
+        .anger-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: rgba(0,0,0,0.5);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            padding: 30px;
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-row .btn {
+            flex: 1;
+        }
+
+        /* Results Card */
+        #results-card {
+            text-align: center;
+        }
+
+        #result-emoji {
+            font-size: 80px;
+            margin-bottom: 15px;
+        }
+
+        #result-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #result-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* Tip Box */
+        .tip-box {
+            background: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 15px;
+        }
+
+        .tip-box h4 {
+            color: #856404;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .tip-box p {
+            font-size: 0.9rem;
+            color: #856404;
+            line-height: 1.5;
+        }
+
+        /* Instructions */
+        .instructions ol {
+            padding-right: 20px;
+            margin: 10px 0;
+        }
+
+        .instructions li {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: var(--primary);
+        }
+
+        /* High Scores */
+        .high-scores {
+            margin-top: 10px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .score-rank {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .score-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            50% { transform: translateX(10px) rotate(5deg); }
+            75% { transform: translateX(-10px) rotate(-5deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        /* Hidden elements */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        /* Prevent zoom on double tap */
+        * {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-emoji">👵🍽️</div>
+            <h1>אקרזט!</h1>
+            <div class="subtitle">המשחק הרשמי של סבתא</div>
+        </div>
+
+        <div class="content">
+            <!-- Grandma Card -->
+            <div class="card grandma-card" id="grandma-card">
+                <div id="grandma-face">👵</div>
+                <div id="grandma-mood" style="color: #2e7d32;">סבתא מחכה...</div>
+                <div id="grandma-says">"בוא נאכל יחד, מותק!"</div>
+            </div>
+
+            <!-- Game Area -->
+            <div class="card" id="game-area">
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value" id="bite-count" style="color: var(--primary);">0</div>
+                        <div class="stat-label">ביסים</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="yell-count" style="color: var(--warning);">0</div>
+                        <div class="stat-label">צעקות</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="timer-display" style="color: var(--danger);">0:00</div>
+                        <div class="stat-label">זמן</div>
+                    </div>
+                </div>
+
+                <!-- Anger Progress Bar -->
+                <div class="anger-container">
+                    <div id="anger-bar"></div>
+                    <span class="anger-label">רמת סבלנות</span>
+                </div>
+
+                <!-- Bite Button -->
+                <button id="bite-btn" class="btn btn-success hidden" onclick="takeBite()">
+                    🍴 לקחתי ביס! 🍴
+                </button>
+
+                <!-- Start/Finish Buttons -->
+                <div class="btn-row">
+                    <button id="start-btn" class="btn btn-primary" onclick="startGame()">
+                        🎮 התחל לאכול!
+                    </button>
+                    <button id="finish-btn" class="btn btn-warning hidden" onclick="finishMeal()">
+                        ✅ סיימתי!
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Card (hidden initially) -->
+            <div class="card hidden" id="results-card">
+                <div id="result-emoji">🏆</div>
+                <div id="result-title">כל הכבוד!</div>
+                <div id="result-text"></div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value" id="final-bites" style="color: var(--primary);">0</div>
+                        <div class="stat-label">ביסים</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="final-yells" style="color: var(--warning);">0</div>
+                        <div class="stat-label">צעקות</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="final-time" style="color: var(--danger);">0:00</div>
+                        <div class="stat-label">זמן</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="resetGame()">
+                    🔄 משחק חדש
+                </button>
+            </div>
+
+            <!-- High Scores -->
+            <div class="card" id="high-scores-card">
+                <div class="card-title">
+                    <span class="card-title-icon">🏆</span>
+                    שיאים אישיים
+                </div>
+                <div class="high-scores" id="high-scores">
+                    <div class="score-item" style="color: #999; text-align: center;">
+                        עדיין לא שיחקת! התחל משחק ראשון.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="card-title-icon">📖</span>
+                    איך משחקים?
+                </div>
+                <div class="instructions">
+                    <ol>
+                        <li>לוחצים <strong>"התחל לאכול"</strong> כשמתחילים את הארוחה</li>
+                        <li>כל פעם שלוקחים ביס אמיתי - לוחצים על <strong>"לקחתי ביס"</strong></li>
+                        <li>אם ממתינים יותר מדי - הסבתא מתחילה לצעוק! 😱</li>
+                        <li>כשסיימתם את הצלחת - לוחצים <strong>"סיימתי"</strong></li>
+                        <li>המטרה: לסיים עם כמה שפחות צעקות!</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="tip-box">
+                <h4>👵 טיפ מהסבתא</h4>
+                <p>"תאכל מהר, אל תתנה לי לצעוק! מי שמסיים בלי צעקות מקבל קינוח מיוחד!"</p>
+            </div>
+
+            <div class="footer">
+                נבנה עם ❤️ ועם הרבה אוכל<br>
+                גרסה 1.0
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== GAME STATE ==========
+        let gameActive = false;
+        let gameInterval = null;
+        let timerInterval = null;
+        let lastBiteTime = 0;
+        let biteCount = 0;
+        let yellCount = 0;
+        let gameStartTime = 0;
+        let currentAngerLevel = 0;
+
+        // ========== GRANDMA LEVELS ==========
+        const grandmaLevels = [
+            {
+                emoji: '😊',
+                mood: 'סבתא מרוצה',
+                color: '#2e7d32',
+                bg: '#e8f5e9',
+                says: [
+                    'יופי, תמשיך לאכול מותק!',
+                    'ככה אני אוהבת!',
+                    'איזה ילד טוב!',
+                    'בתאבון!',
+                    'עוד ביס, יופי!',
+                    'הצלחת כמעט ריקה!'
+                ]
+            },
+            {
+                emoji: '😐',
+                mood: 'סבתא מודאגת',
+                color: '#f57c00',
+                bg: '#fff3e0',
+                says: [
+                    'למה הפסקת?',
+                    'זה לא טעים לך?',
+                    'עוד קצת, נו...',
+                    'אתה לא רעב?',
+                    'תאכל כבר!',
+                    'מה קרה פתאום?'
+                ]
+            },
+            {
+                emoji: '😤',
+                mood: 'סבתא כועסת',
+                color: '#c62828',
+                bg: '#ffebee',
+                says: [
+                    'תאכל עכשיו!',
+                    'אתה לא יוצא מהשולחן!',
+                    'למה אתה עושה לי ככה?!',
+                    'בישלתי שעות!',
+                    'אל תעשה לי צרות!',
+                    'תגמור את הצלחת!'
+                ]
+            },
+            {
+                emoji: '🤯',
+                mood: 'סבתא משתגעת',
+                color: '#7b1fa2',
+                bg: '#f3e5f5',
+                says: [
+                    'בילי ובסרקי!!!',
+                    'תאכל או שאני מתקשרת לאמא!!!',
+                    'מה יגידו השכנים?!?!',
+                    'אני לא מאמינה!!!',
+                    'הילדים היום לא מכבדים!!!',
+                    'בזמני אכלנו הכל!!!'
+                ]
+            }
+        ];
+
+        // ========== GAME FUNCTIONS ==========
+        function startGame() {
+            gameActive = true;
+            biteCount = 0;
+            yellCount = 0;
+            currentAngerLevel = 0;
+            gameStartTime = Date.now();
+            lastBiteTime = Date.now();
+
+            // Update UI
+            document.getElementById('bite-count').textContent = '0';
+            document.getElementById('yell-count').textContent = '0';
+            document.getElementById('timer-display').textContent = '0:00';
+            document.getElementById('start-btn').classList.add('hidden');
+            document.getElementById('bite-btn').classList.remove('hidden');
+            document.getElementById('finish-btn').classList.remove('hidden');
+            document.getElementById('results-card').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            document.getElementById('anger-bar').style.width = '0%';
+
+            updateGrandma(0);
+
+            // Game loop - check every 100ms
+            gameInterval = setInterval(checkAnger, 100);
+
+            // Timer display
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function checkAnger() {
+            if (!gameActive) return;
+
+            const timeSinceBite = (Date.now() - lastBiteTime) / 1000;
+            let newLevel = 0;
+
+            // Anger escalates: 0-3s = happy, 3-6s = worried, 6-9s = angry, 9s+ = crazy
+            if (timeSinceBite < 3) {
+                newLevel = 0;
+            } else if (timeSinceBite < 6) {
+                newLevel = 1;
+            } else if (timeSinceBite < 9) {
+                newLevel = 2;
+            } else {
+                newLevel = 3;
+            }
+
+            // Update anger bar
+            const angerPercent = Math.min((timeSinceBite / 12) * 100, 100);
+            const angerBar = document.getElementById('anger-bar');
+            angerBar.style.width = angerPercent + '%';
+
+            if (angerPercent < 25) {
+                angerBar.style.background = 'linear-gradient(90deg, #4caf50, #8bc34a)';
+            } else if (angerPercent < 50) {
+                angerBar.style.background = 'linear-gradient(90deg, #8bc34a, #ffeb3b)';
+            } else if (angerPercent < 75) {
+                angerBar.style.background = 'linear-gradient(90deg, #ffeb3b, #ff9800)';
+            } else {
+                angerBar.style.background = 'linear-gradient(90deg, #ff9800, #f44336)';
+            }
+
+            // Level changed - grandma speaks!
+            if (newLevel > currentAngerLevel) {
+                currentAngerLevel = newLevel;
+                updateGrandma(newLevel);
+
+                if (newLevel >= 1) {
+                    yellCount++;
+                    document.getElementById('yell-count').textContent = yellCount;
+                    vibratePhone();
+                    shakeGrandma();
+                }
+            }
+        }
+
+        function updateGrandma(level) {
+            const data = grandmaLevels[level];
+            const says = data.says[Math.floor(Math.random() * data.says.length)];
+
+            document.getElementById('grandma-face').textContent = data.emoji;
+            document.getElementById('grandma-mood').textContent = data.mood;
+            document.getElementById('grandma-mood').style.color = data.color;
+            document.getElementById('grandma-says').textContent = '"' + says + '"';
+
+            // Change card background
+            document.getElementById('grandma-card').style.background = data.bg;
+        }
+
+        function takeBite() {
+            if (!gameActive) return;
+
+            biteCount++;
+            document.getElementById('bite-count').textContent = biteCount;
+            lastBiteTime = Date.now();
+            currentAngerLevel = 0;
+            updateGrandma(0);
+
+            // Visual feedback
+            const btn = document.getElementById('bite-btn');
+            btn.classList.add('pulse');
+            setTimeout(() => btn.classList.remove('pulse'), 300);
+
+            // Small vibration for feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        function finishMeal() {
+            gameActive = false;
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+
+            const totalTime = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+            const timeStr = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+
+            // Show results
+            document.getElementById('final-bites').textContent = biteCount;
+            document.getElementById('final-yells').textContent = yellCount;
+            document.getElementById('final-time').textContent = timeStr;
+
+            // Determine result
+            let emoji, title, text;
+            if (yellCount === 0) {
+                emoji = '🏆';
+                title = 'מושלם!';
+                text = 'סבתא גאה בך! אכלת בלי אפילו צעקה אחת! תקבל קינוח מיוחד!';
+            } else if (yellCount <= 3) {
+                emoji = '😊';
+                title = 'כל הכבוד!';
+                text = 'סבתא מרוצה! רק ' + yellCount + ' צעקות קטנות... אפשר לשפר!';
+            } else if (yellCount <= 7) {
+                emoji = '😅';
+                title = 'לא רע...';
+                text = 'סבתא קצת התעייפה מלצעוק. ' + yellCount + ' צעקות זה הרבה! בפעם הבאה תאכל יותר מהר!';
+            } else {
+                emoji = '😱';
+                title = 'אוי ואבוי!';
+                text = 'סבתא איבדה את הקול! ' + yellCount + ' צעקות?! היא צריכה לנוח עכשיו...';
+            }
+
+            document.getElementById('result-emoji').textContent = emoji;
+            document.getElementById('result-title').textContent = title;
+            document.getElementById('result-text').textContent = text;
+
+            document.getElementById('game-area').classList.add('hidden');
+            document.getElementById('results-card').classList.remove('hidden');
+
+            // Save high score
+            saveHighScore(biteCount, yellCount, totalTime);
+        }
+
+        function resetGame() {
+            document.getElementById('start-btn').classList.remove('hidden');
+            document.getElementById('bite-btn').classList.add('hidden');
+            document.getElementById('finish-btn').classList.add('hidden');
+            document.getElementById('results-card').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            document.getElementById('timer-display').textContent = '0:00';
+            document.getElementById('bite-count').textContent = '0';
+            document.getElementById('yell-count').textContent = '0';
+            document.getElementById('anger-bar').style.width = '0%';
+
+            document.getElementById('grandma-card').style.background = '';
+            document.getElementById('grandma-face').textContent = '👵';
+            document.getElementById('grandma-mood').textContent = 'סבתא מחכה...';
+            document.getElementById('grandma-mood').style.color = '#2e7d32';
+            document.getElementById('grandma-says').textContent = '"בוא נאכל יחד, מותק!"';
+        }
+
+        function updateTimer() {
+            if (!gameActive) return;
+            const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer-display').textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        }
+
+        function vibratePhone() {
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]);
+            }
+        }
+
+        function shakeGrandma() {
+            const face = document.getElementById('grandma-face');
+            face.classList.remove('shake');
+            face.offsetHeight; // Trigger reflow
+            face.classList.add('shake');
+        }
+
+        // ========== HIGH SCORES ==========
+        function saveHighScore(bites, yells, time) {
+            let scores = JSON.parse(localStorage.getItem('akrazat-scores') || '[]');
+
+            scores.push({
+                bites: bites,
+                yells: yells,
+                time: time,
+                date: new Date().toLocaleDateString('he-IL')
+            });
+
+            // Sort by yells (ascending), then by time (ascending)
+            scores.sort((a, b) => {
+                if (a.yells !== b.yells) return a.yells - b.yells;
+                return a.time - b.time;
+            });
+
+            // Keep top 5
+            scores = scores.slice(0, 5);
+
+            localStorage.setItem('akrazat-scores', JSON.stringify(scores));
+            displayHighScores();
+        }
+
+        function displayHighScores() {
+            const scores = JSON.parse(localStorage.getItem('akrazat-scores') || '[]');
+            const container = document.getElementById('high-scores');
+
+            if (scores.length === 0) {
+                container.innerHTML = `
+                    <div class="score-item" style="color: #999; text-align: center; display: block;">
+                        עדיין לא שיחקת! התחל משחק ראשון.
+                    </div>
+                `;
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+            container.innerHTML = scores.map((score, index) => {
+                const minutes = Math.floor(score.time / 60);
+                const seconds = score.time % 60;
+                const timeStr = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+
+                return `
+                    <div class="score-item">
+                        <span class="score-rank">${medals[index]} ${score.yells} צעקות</span>
+                        <span class="score-details">${score.bites} ביסים | ${timeStr} | ${score.date}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========== INITIALIZE ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            displayHighScores();
+        });
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
