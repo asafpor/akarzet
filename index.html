@@ -6,6 +6,18 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#667eea">
+    <meta name="description" content="המשחק הרשמי של סבתא - תאכל מהר לפני שהיא תצעק!">
+
+    <!-- Open Graph for WhatsApp sharing -->
+    <meta property="og:title" content="אקרזט - המשחק של סבתא">
+    <meta property="og:description" content="תאכל מהר לפני שסבתא תצעק! משחק הורדת אוכל הכי מצחיק">
+    <meta property="og:image" content="icon-512.png">
+    <meta property="og:type" content="website">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <title>אקרזט - המשחק של סבתא</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👵</text></svg>">
     <style>
@@ -798,6 +810,13 @@
         // ========== INITIALIZE ==========
         document.addEventListener('DOMContentLoaded', () => {
             displayHighScores();
+
+            // Register service worker for PWA
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('Service Worker registered'))
+                    .catch(err => console.log('SW registration failed:', err));
+            }
         });
 
         // Prevent zoom on double tap
