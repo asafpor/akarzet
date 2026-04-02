@@ -1,4 +1,4 @@
-const CACHE_NAME = 'akrazat-v1';
+const CACHE_NAME = 'akrazat-v2';
 const urlsToCache = [
   './',
   './index.html',

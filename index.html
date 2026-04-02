@@ -501,6 +501,91 @@
         let gameStartTime = 0;
         let currentAngerLevel = 0;
 
+        // ========== SOUND SYSTEM ==========
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playVictorySound() {
+            // Triumphant fanfare melody
+            const notes = [
+                { freq: 523, duration: 0.15 },  // C5
+                { freq: 659, duration: 0.15 },  // E5
+                { freq: 784, duration: 0.15 },  // G5
+                { freq: 1047, duration: 0.4 }, // C6
+            ];
+
+            let time = audioContext.currentTime;
+            notes.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.value = note.freq;
+                osc.type = 'triangle';
+                gain.gain.setValueAtTime(0.3, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + note.duration);
+                osc.start(time);
+                osc.stop(time + note.duration);
+                time += note.duration * 0.8;
+            });
+        }
+
+        function playScarySound() {
+            // Creepy descending tone with distortion
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const distortion = audioContext.createWaveShaper();
+
+            // Create distortion curve
+            const curve = new Float32Array(256);
+            for (let i = 0; i < 256; i++) {
+                const x = (i / 128) - 1;
+                curve[i] = Math.tanh(x * 3);
+            }
+            distortion.curve = curve;
+
+            osc.connect(distortion);
+            distortion.connect(gain);
+            gain.connect(audioContext.destination);
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(400, audioContext.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 1.5);
+
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+
+            osc.start();
+            osc.stop(audioContext.currentTime + 1.5);
+
+            // Add a second low rumble
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            osc2.type = 'sine';
+            osc2.frequency.value = 60;
+            gain2.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+            osc2.start();
+            osc2.stop(audioContext.currentTime + 2);
+        }
+
+        function playYellSound() {
+            // Quick alarm-like sound
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, audioContext.currentTime);
+            osc.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+            osc.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.3);
+        }
+
         // ========== GRANDMA LEVELS ==========
         const grandmaLevels = [
             {
@@ -514,7 +599,9 @@
                     'איזה ילד טוב!',
                     'בתאבון!',
                     'עוד ביס, יופי!',
-                    'הצלחת כמעט ריקה!'
+                    'הצלחת כמעט ריקה!',
+                    'תראה איך אתה גדל מהאוכל שלי!',
+                    'עוד קצת ותהיה חזק כמו סבא!'
                 ]
             },
             {
@@ -528,7 +615,10 @@
                     'עוד קצת, נו...',
                     'אתה לא רעב?',
                     'תאכל כבר!',
-                    'מה קרה פתאום?'
+                    'מה קרה פתאום?',
+                    'תאכל מהר, לפני שכל הוויטמינים יברחו מהצלחת מהשיעמום!',
+                    'תסיים את המרק, כל ביס זה עוד שנת חיים לסבתא!',
+                    'תאכל עוד קציצה, השכנים כבר שואלים אותי אם נגמר לנו האוכל בבית!'
                 ]
             },
             {
@@ -542,7 +632,11 @@
                     'למה אתה עושה לי ככה?!',
                     'בישלתי שעות!',
                     'אל תעשה לי צרות!',
-                    'תגמור את הצלחת!'
+                    'תגמור את הצלחת!',
+                    'אם לא תאכל, השוטר יבוא וייקח אותי כי הוא יחשוב שאני מרעיבה אותך!',
+                    'תסיים את הצלחת, שלא יבואו מהרווחה לבדוק למה הילד נראה כמו שלד!',
+                    'מה, אתה רוצה שאני אתקשר לאמא שלך ואגיד לה שאתה עושה שביתת רעב?!',
+                    'אם לא תאכל, איך יהיה לך כוח לברוח מהשוטר כשיבוא לבדוק למה אתה כזה רזה?!'
                 ]
             },
             {
@@ -556,13 +650,22 @@
                     'מה יגידו השכנים?!?!',
                     'אני לא מאמינה!!!',
                     'הילדים היום לא מכבדים!!!',
-                    'בזמני אכלנו הכל!!!'
+                    'בזמני אכלנו הכל!!!',
+                    'אם לא תסיים הכל, האוכל יבכה בלילה ויגיד שאתה לא אוהב את סבתא!!!',
+                    'תראה את דוד שלך, הוא לא אכל כשהיה קטן ותראה איך הוא נראה היום – חיוור כמו קיר!!!',
+                    'אל תשאיר פירור, אחר כך בחדשות יגידו שסבתא שלך קמצנית ולא נותנת אוכל!!!',
+                    'השוטרים כבר בדרך!!! הרווחה כבר יודעים!!!'
                 ]
             }
         ];
 
         // ========== GAME FUNCTIONS ==========
         function startGame() {
+            // Resume audio context (required for mobile browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             gameActive = true;
             biteCount = 0;
             yellCount = 0;
@@ -632,6 +735,7 @@
                     document.getElementById('yell-count').textContent = yellCount;
                     vibratePhone();
                     shakeGrandma();
+                    playYellSound();
                 }
             }
         }
@@ -684,16 +788,18 @@
             document.getElementById('final-yells').textContent = yellCount;
             document.getElementById('final-time').textContent = timeStr;
 
-            // Determine result
+            // Determine result and play sound
             let emoji, title, text;
             if (yellCount === 0) {
                 emoji = '🏆';
                 title = 'מושלם!';
                 text = 'סבתא גאה בך! אכלת בלי אפילו צעקה אחת! תקבל קינוח מיוחד!';
+                playVictorySound();
             } else if (yellCount <= 3) {
                 emoji = '😊';
                 title = 'כל הכבוד!';
                 text = 'סבתא מרוצה! רק ' + yellCount + ' צעקות קטנות... אפשר לשפר!';
+                playVictorySound();
             } else if (yellCount <= 7) {
                 emoji = '😅';
                 title = 'לא רע...';
@@ -701,7 +807,8 @@
             } else {
                 emoji = '😱';
                 title = 'אוי ואבוי!';
-                text = 'סבתא איבדה את הקול! ' + yellCount + ' צעקות?! היא צריכה לנוח עכשיו...';
+                text = 'סבתא איבדה את הקול! ' + yellCount + ' צעקות?! היא צריכה לנוח עכשיו... הרווחה בדרך!';
+                playScarySound();
             }
 
             document.getElementById('result-emoji').textContent = emoji;
